@@ -1,0 +1,80 @@
+# sfred's .zshrc
+# https://github.com/sfred/dotfiles
+
+# Load aliases
+source ~/.aliases
+
+# Load Starship
+eval "$(starship init zsh)"
+
+# Load NVM
+export NVM_DIR="$HOME/.nvm"
+    [ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && . "$(brew --prefix)/opt/nvm/nvm.sh" # This loads nvm
+    [ -s "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm" ] && . "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm" # This loads nvm bash_completion
+
+# Automatically switch node versions when a directory has a `.nvmrc` file
+load-nvmrc() {
+    local node_version="$(nvm version)" # Current node version
+    local nvmrc_path="$(nvm_find_nvmrc)" # Path to the .nvmrc file
+
+    # Check if there exists a .nvmrc file
+    if [ -n "$nvmrc_path" ]; then
+    local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
+
+    # Check if the node version in .nvmrc is installed on the computer
+    if [ "$nvmrc_node_version" = "N/A" ]; then
+        # Install the node version in .nvmrc on the computer and switch to that node version
+        nvm install
+    # Check if the current node version matches the version in .nvmrc
+    elif [ "$nvmrc_node_version" != "$node_version" ]; then
+        # Switch node versions
+        nvm use
+    fi
+    # If there isn't an .nvmrc make sure to set the current node version to the default node version
+    elif [ "$node_version" != "$(nvm version default)" ]; then
+    echo "Reverting to nvm default version"
+    nvm use default
+    fi
+}
+
+# Add the above function when the present working directory (pwd) changes
+autoload -U add-zsh-hook
+add-zsh-hook chpwd load-nvmrc
+load-nvmrc
+
+# Uses the zsh precmd function hook to set the tab title to the current working directory before each prompt
+function precmd () {
+    window_title="\\033]0;${PWD##*/}\\007"
+    echo -ne "$window_title"
+}
+
+# goenv
+eval "$(goenv init -)"
+
+# Pyenv
+alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew'
+eval "$(pyenv init -)"
+export PATH="$PYENV_ROOT/bin:$PATH"
+
+# Pyenv-virtualenv
+eval "$(pyenv virtualenv-init -)"
+export SPACESHIP_VENV_SHOW=false
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+
+# Set docker / kube prompts
+export SPACESHIP_DOCKER_SHOW=false
+export SPACESHIP_KUBECONTEXT_SYMBOL="☸ "
+
+# Yarn
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+
+# Source zfunctions and homebrew
+export PATH="/usr/local/sbin:$PATH"
+fpath=($fpath "/Users/sfred/.zfunctions")
+
+# Ruby
+export PATH="$HOME/.rbenv/bin:$PATH"
+eval "$(rbenv init - zsh)"
+
+# ZSH Syntax Highlighting
+source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

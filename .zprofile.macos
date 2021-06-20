@@ -1,0 +1,9 @@
+# Load Homebrew
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Set editor
+export EDITOR=nano
+export GIT_EDITOR=nano
+
+# Load pyenv
+eval "$(pyenv init --path)"

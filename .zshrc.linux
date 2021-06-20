@@ -1,0 +1,32 @@
+# sfred's .zshrc
+# https://github.com/sfred/dotfiles
+
+# Load ZSH functions
+autoload -U add-zsh-hook
+
+# History & compinit setup
+HISTFILE=~/.histfile
+HISTSIZE=1000
+SAVEHIST=1000
+bindkey -e
+
+autoload -Uz compinit
+compinit
+
+# ZSH Syntax Highlighting
+source ~/.zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# Aliases
+alias reload="source ~/.zshrc"
+
+eval "$(starship init zsh)"
+
+# Set docker / kube prompts
+export SPACESHIP_DOCKER_SHOW=false
+export SPACESHIP_KUBECONTEXT_SYMBOL="☸ "
+
+# Uses the zsh precmd function hook to set the tab title to the current working directory before each prompt
+function precmd () {
+    window_title="\\033]0;${PWD##*/}\\007"
+    echo -ne "$window_title"
+}
